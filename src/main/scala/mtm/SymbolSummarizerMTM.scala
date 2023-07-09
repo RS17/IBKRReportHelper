@@ -26,7 +26,6 @@ object SymbolSummarizerMTM extends DefaultModule {
       symbolMap += name -> List()
       profitMap += name -> 0.0
     }
-    println(symbolMap)
 
     // add option rows
     for (optionRow <- resultsOpts) {

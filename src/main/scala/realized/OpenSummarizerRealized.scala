@@ -82,6 +82,7 @@ object OpenSummarizerRealized extends DefaultModule {
       println("\n WARNING: Put and Call sides not equal " + symbolDateOpts.mkString("|") + " \n")
       Math.max(putSideRisk, callSideRisk)
     } else {
+      println("got date spread risk " + symbolDateOpts.head.date + " " + symbolDateOpts.head.symbolUnderlying + ": " + putSideRisk)
       putSideRisk
     }
   }
