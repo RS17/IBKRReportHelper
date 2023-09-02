@@ -19,22 +19,31 @@ object SymbolSummarizerMTM extends DefaultModule {
     val resultsDivs = importCSVGreedy(path, DividendRowMatcher).flatten
 
     val symbolMap: mutable.Map[String, List[OptionRowMTM]] = mutable.Map[String, List[OptionRowMTM]]()
+    val symbolDateMap: mutable.Map[String, List[OptionRowMTM]] = mutable.Map[String, List[OptionRowMTM]]()
     val profitMap: mutable.Map[String, Double] = mutable.Map[String, Double]()
+    val profitDateMap: mutable.Map[String, Double] = mutable.Map[String, Double]()
 
     // setup maps
     for (name <- (resultsOpts.map(_.symbolUnderlying) ++ resultsStock.map(_.symbol) ++ resultsDivs.map(_.symbol)).distinct) {
       symbolMap += name -> List()
       profitMap += name -> 0.0
+      profitDateMap += name -> 0.0
     }
 
     // add option rows
     for (optionRow <- resultsOpts) {
       symbolMap(optionRow.symbolUnderlying) = symbolMap(optionRow.symbolUnderlying) :+ optionRow
+      val symbolDateString = optionRow.symbolUnderlying + ":" + optionRow.date
+      symbolDateMap.getOrElse(symbolDateString, symbolDateMap += symbolDateString -> List())
+      symbolDateMap(symbolDateString) = symbolDateMap(symbolDateString) :+ optionRow
     }
 
     // get option sum
     for ((key, optList) <- symbolMap) {
       profitMap(key) = optList.foldLeft(0.0)(_ + _.profit)
+    }
+    for ((key, optList) <- symbolDateMap) {
+      profitDateMap(key) = optList.foldLeft(0.0)(_ + _.profit)
     }
 
     // get stock sum
@@ -49,7 +58,7 @@ object SymbolSummarizerMTM extends DefaultModule {
 
     //TODO: count dividend accruals ONLY IF in the future
 
-
+    println("RESULTS BY DATE: \n" + profitDateMap.toList.sortBy(_._1).map{case (symDate, profit) => symDate + " -> " + profit}.mkString("\n"))
     println("FINAL RESULTS: \n" + profitMap.toList.sortBy(_._1).map{case (sym, price) => sym + " -> " + price}.mkString("\n"))
   }
 }
