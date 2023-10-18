@@ -79,7 +79,7 @@ object OpenSummarizerRealized extends DefaultModule {
     val putSideRisk = getSideSpreadRisk(puts)
     val callSideRisk = getSideSpreadRisk(calls)
     if(callSideRisk != putSideRisk){
-      println("\n WARNING: Put and Call sides not equal " + symbolDateOpts.mkString("|") + " \n")
+      println("\n WARNING: Put and Call sides not equal " + symbolDateOpts.mkString("|") + " \n" + "P:" + putSideRisk + "|" + "C:" + callSideRisk)
       Math.max(putSideRisk, callSideRisk)
     } else {
       println("got date spread risk " + symbolDateOpts.head.date + " " + symbolDateOpts.head.symbolUnderlying + ": " + putSideRisk)
@@ -91,8 +91,9 @@ object OpenSummarizerRealized extends DefaultModule {
   // Sum up all negative strike * amt  and same for positive.  Subtract pos from negative or vice versa depending on side.
   // do check to ensure sums are equal, otherwise this will get screwy
   def getSideSpreadRisk(symbolDateSideOpts: List[OpenOptionRow]):Double = {
-    if(symbolDateSideOpts.foldLeft(0.0)((total, opt)=>total + opt.size)!= 0.0) {
-      println("Warning, size mismatch" + symbolDateSideOpts.mkString("|"))
+    val sideSpreadDelta = symbolDateSideOpts.foldLeft(0.0)((total, opt)=>total + opt.size)
+    if(sideSpreadDelta!= 0.0) {
+      println("Warning, size mismatch " + symbolDateSideOpts.mkString("|") + " Delta: " + sideSpreadDelta)
     }
     val optValue = symbolDateSideOpts.foldLeft(0.0)((total, opt)=> total + opt.strike * opt.size)
 
