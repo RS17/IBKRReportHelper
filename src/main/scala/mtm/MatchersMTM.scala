@@ -8,18 +8,19 @@ object MatchersMTM {
 
   object StockRowMatcherMTM extends ImportMatcher[StockRowMTM] {
     override def matcher: Array[String] => Boolean = (strs: Array[String]) =>
-      strs(0) == "Positions and Mark-to-Market Profit and Loss" && strs(2) == "Stocks"
+      strs(0) == "Positions and Mark-to-Market Profit and Loss" && strs(3) == "Stocks" &&
+        strs(2) == "Summary"
 
     override def builder: Array[String] => StockRowMTM = (strs: Array[String]) =>
       StockRowMTM(
-        symbol = strs(4),
-        profit = strs(16).toDouble
+        symbol = strs(5),
+        profit = strs(17).toDouble
       )
 
     override def testMe: Boolean = {
       val strs = Array("", "", "Stocks")
       val result = matcher(strs)
-      result == false
+      !result
     }
   }
 
@@ -28,16 +29,17 @@ object MatchersMTM {
   object OptionRowMatcherMTM extends ImportMatcher[OptionRowMTM] {
     override def matcher: Array[String] => Boolean = (strs: Array[String]) =>
       strs(0) == "Positions and Mark-to-Market Profit and Loss" &&
-        strs(2) == "Equity and Index Options"
+        strs(3) == "Equity and Index Options" &&
+        strs(2) == "Summary"
 
     override def builder: Array[String] => OptionRowMTM = (strs: Array[String]) => {
-      val symbolRow = strs(5).split(" ")
+      val symbolRow = strs(6).split(" ")
       OptionRowMTM(
         symbolUnderlying = symbolRow(0),
         putCall = symbolRow(3),
         date = symbolRow(1),
         strike = symbolRow(2).toDouble,
-        profit = strs(16).toDouble
+        profit = strs(17).toDouble
       )
     }
   }

@@ -13,10 +13,11 @@ object SymbolSummarizerMTM extends DefaultModule {
 
     if (args.length == 0) throw new IllegalArgumentException("Must provide path argument")
     val path = args(0)
+    val symbol = if(args.length == 2) Some(args(1)) else None
 
-    val resultsStock = importCSVGreedy(path, StockRowMatcherMTM).flatten
-    val resultsOpts = importCSVGreedy(path, OptionRowMatcherMTM).flatten
-    val resultsDivs = importCSVGreedy(path, DividendRowMatcher).flatten
+    val resultsStock = importCSVGreedy(path, StockRowMatcherMTM).flatten.filter(stockRow => symbol.forall(_ == stockRow.symbol))
+    val resultsOpts = importCSVGreedy(path, OptionRowMatcherMTM).flatten.filter(optionRow => symbol.forall(_ == optionRow.symbolUnderlying))
+    val resultsDivs = importCSVGreedy(path, DividendRowMatcher).flatten.filter(divRow => symbol.forall(_ == divRow.symbol))
 
     val symbolMap: mutable.Map[String, List[OptionRowMTM]] = mutable.Map[String, List[OptionRowMTM]]()
     val symbolDateMap: mutable.Map[String, List[OptionRowMTM]] = mutable.Map[String, List[OptionRowMTM]]()
@@ -57,8 +58,8 @@ object SymbolSummarizerMTM extends DefaultModule {
     }
 
     //TODO: count dividend accruals ONLY IF in the future
-
-    println("RESULTS BY DATE: \n" + profitDateMap.toList.sortBy(_._1).map{case (symDate, profit) => symDate + " -> " + profit}.mkString("\n"))
-    println("FINAL RESULTS: \n" + profitMap.toList.sortBy(_._1).map{case (sym, price) => sym + " -> " + price}.mkString("\n"))
+    println("STOCK RESULTS: \n" + resultsStock.sortBy(_.symbol).map( sRow => sRow.symbol + " -> " + sRow.profit).mkString("\n"))
+    println("OPTION RESULTS BY DATE: \n" + profitDateMap.toList.sortBy(_._1).map{case (symDate, profit) => symDate + " -> " + profit}.mkString("\n"))
+    println("\nFINAL RESULTS: \n" + profitMap.toList.sortBy(_._1).map{case (sym, price) => sym + " -> " + price}.mkString("\n"))
   }
 }
